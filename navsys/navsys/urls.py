@@ -1,5 +1,5 @@
 """
-URL configuration for navbar project.
+URL configuration for navsys project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.0/topics/http/urls/
@@ -16,7 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from navsysMain import views
+
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
+    path('publish', views.publish_message, name='publish'),
+    path('api/call-device/', views.call_device_api, name='call-device-api'),
+    path('api/call-items/', views.call_items_api, name='call-items-api'),
+    path('api/item/', views.get_item_by_rfid, name='get-item-by-rfid'),
 ]
