@@ -2,7 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import Item, Record
 from .signals import mqtt_received
-from .device import handle_config, handle_ping, handle_rfid, handle_sensor
+from .device import MQHandler
 import logging
 from .crypto import MQTTSafe
 
@@ -36,12 +36,12 @@ def handle_mqtt_message(sender, topic, payload, sn, **kwargs):
         return
 
     if topic == 'config':
-        handle_config(payload)
+        MQHandler.config(payload)
     elif topic == 'ping':
-        handle_ping(sn, payload)
+        MQHandler.ping(sn, payload)
     elif topic == 'sensor':
-        handle_sensor(sn, payload)
+        MQHandler.sensor(sn, payload)
     elif topic == 'reader':
-        handle_rfid(payload)
+        MQHandler.rfid(payload)
 
 

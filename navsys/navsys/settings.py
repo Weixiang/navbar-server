@@ -30,7 +30,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
-USE_AES = False
+USE_AES = True
 AES_KEY = "8c0abd334b744562a5251e6f25bca860"
 
 

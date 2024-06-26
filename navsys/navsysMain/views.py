@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .mqtt import client as mqtt_client
-from .device import callDevice, callItem
+from .device import DevCtrl
 from .serializers import ItemSerializer
 from .models import Item
 
@@ -25,7 +25,7 @@ def call_device_api(request):
         delay = request.data.get('delay', 3)
         
         try:
-            success, error = callDevice(sn, en, delay)
+            success, error = DevCtrl.callDevice(sn, en, delay)
             if success:
                 return Response({'success': True, 'message': f'Successfully called device {sn}'})
             else:
@@ -43,7 +43,7 @@ def call_items_api(request):
         delay = request.data.get('delay', 3)
         
         try:
-            success, result_message = callItem(rfid_list, en, delay)
+            success, result_message = DevCtrl.callItem(rfid_list, en, delay)
             if success:
                 return Response({'success': True, 'message': result_message})
             else:

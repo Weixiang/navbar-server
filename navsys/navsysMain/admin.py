@@ -1,7 +1,6 @@
 from django.contrib import admin
-from django.http import HttpResponse
 from .models import Warehouse, Item, Device, Environment, Record
-from .device import callDevice, callItem
+from .device import DevCtrl
 
 # Register your models here.
 import logging
@@ -30,7 +29,7 @@ class ItemAdmin(admin.ModelAdmin):
     def call_button(self, request, queryset):
         try:
             rfid_list = list(queryset.values_list('rfid', flat=True))
-            success, result_message = callItem(rfid_list, en=True, delay=3)
+            success, result_message = DevCtrl.callItem(rfid_list, en=True, delay=3)
             if success:
                 self.message_user(request, result_message, level='success')
             else:
@@ -69,7 +68,7 @@ class DeviceAdmin(admin.ModelAdmin):
         try:
             selected_devices = list(queryset)
             for device in selected_devices:
-                success, error = callDevice(device.sn, en=True, delay=3)
+                success, error = DevCtrl.callDevice(device.sn, en=True, delay=3)
                 if success:
                     self.message_user(request, f"成功呼叫设备 {device.sn}", level='success')
                 else:
