@@ -5,6 +5,7 @@ import json
 import logging
 from django.conf import settings
 from .mqtt import client as mqtt_client
+from datetime import datetime, timezone, timedelta
 
 logger = logging.getLogger('AES')
 
@@ -22,7 +23,14 @@ class MQTTSafe:
         return json.dumps({'data': encrypted_payload})
 
     @staticmethod
-    def publish(topic, payload):
+    def publish(topic, msg):
+        msg["sender"] = "server"
+
+        beijing_tz = timezone(timedelta(hours=8))
+        current_time_beijing = datetime.now(beijing_tz)
+        msg["timestamp"] = current_time_beijing.isoformat()
+
+        payload = json.dumps(msg)
         try:
             if settings.USE_AES:
                 logger.debug(f'Original payload: {payload}')
@@ -55,8 +63,8 @@ class MQTTSafe:
     def decrypt(payload):
         try:
             if settings.USE_AES:
-                payload_json = json.loads(payload)
-                encrypted_payload = payload_json['data']
+                # payload_json = json.loads(payload)
+                encrypted_payload = payload['data']
                 return MQTTSafe._decrypt_payload(encrypted_payload)
             else:
                 return payload

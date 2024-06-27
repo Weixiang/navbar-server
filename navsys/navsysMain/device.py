@@ -15,9 +15,9 @@ class DevCtrl:
     @staticmethod
     def publish(topic: str, msg: dict):
         try:
-            message = json.dumps(msg)
-            MQTTSafe.publish(topic, message)
-            logger.info(f'Sent message to topic {topic}: {message}')
+            msg["sender"] = "server"
+            MQTTSafe.publish(topic, msg)
+            logger.info(f'Sent message to topic {topic}: {msg}')
             return True, None
         except Exception as e:
             error_message = f"Failed to publish message to topic {topic}: {str(e)}"
@@ -70,7 +70,7 @@ class DevCtrl:
             failed_devices = []
 
             for device in devices:
-                success, error = DevCtrl.call_device(device.sn, enable, delay)
+                success, error = DevCtrl.callDevice(device.sn, enable, delay)
                 if success:
                     success_devices.append(device.sn)
                 else:

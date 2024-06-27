@@ -11,8 +11,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-import logging
-import colorlog
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,12 +28,9 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
-USE_AES = True
+USE_AES = False
 AES_KEY = "8c0abd334b744562a5251e6f25bca860"
 
-
-
-# Application definition
 
 INSTALLED_APPS = [
     'simpleui',
@@ -46,6 +41,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "navsysMain",
+    'rest_framework', 
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -204,3 +201,9 @@ LOGGING = {
         },
     },
 }
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    )}

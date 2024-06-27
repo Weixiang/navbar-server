@@ -5,6 +5,11 @@ from .signals import mqtt_received
 from .device import MQHandler
 import logging
 from .crypto import MQTTSafe
+import json
+
+from django.conf import settings
+from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
 
 logger = logging.getLogger('MQTT')
 loggerdb = logging.getLogger('DB')
@@ -27,10 +32,20 @@ def create_record(sender, instance, created, **kwargs):
 
 @receiver(mqtt_received)
 def handle_mqtt_message(sender, topic, payload, sn, **kwargs):
-    logger.info(f'[RAW] Topic: {topic} , Payload:{payload} {type(payload)}')
+    try:
+        payload_dict = json.loads(payload)
+    except json.JSONDecodeError as e:
+        logger.error(f'Error in decoding JSON: {e}')
+        return
+
+    if payload_dict.get("sender") == "server":
+        logger.debug('Message from server, no further processing required.')
+        return
+
+    logger.info(f'[RAW] Topic: {topic} , Payload:{payload_dict}')
 
     try:
-        payload = MQTTSafe.decrypt(payload)
+        payload = MQTTSafe.decrypt(payload_dict)
     except Exception as e:
         logger.error(f'Error in decrypt_message: {e}')
         return
@@ -45,3 +60,7 @@ def handle_mqtt_message(sender, topic, payload, sn, **kwargs):
         MQHandler.rfid(payload)
 
 
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)

@@ -16,13 +16,26 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from navsysMain import views
-
+from rest_framework.authtoken import views
+from navsysMain.views import (
+    index, 
+    PublishMessageView, 
+    CallDeviceAPIView, 
+    CallItemsAPIView, 
+    GetItemByRFIDAPIView, 
+    EncryptAPIView,
+    DecryptAPIView
+)
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path('publish', views.publish_message, name='publish'),
-    path('api/call-device/', views.call_device_api, name='call-device-api'),
-    path('api/call-items/', views.call_items_api, name='call-items-api'),
-    path('api/item/', views.get_item_by_rfid, name='get-item-by-rfid'),
+    path('admin/', admin.site.urls),
+    path('', index, name='project_home'),  # 项目主页
+
+    path('api/publish', PublishMessageView.as_view(), name='publish_message'),
+    path('api/calldevice', CallDeviceAPIView.as_view(), name='call_device_api'),
+    path('api/callitems', CallItemsAPIView.as_view(), name='call_items_api'),
+    path('api/getitems', GetItemByRFIDAPIView.as_view(), name='get_item_by_rfid'),
+    path('api/token', views.obtain_auth_token, name='token_obtain_pair'),
+    path('api/encrypt', EncryptAPIView.as_view(), name='encrypt_payload'),
+    path('api/decrypt', DecryptAPIView.as_view(), name='decrypt_payload'),
 ]
