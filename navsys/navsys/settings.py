@@ -25,11 +25,11 @@ SECRET_KEY = "django-insecure-c_awwve(hb)_vpjics4=#fykyg&!=r^4=k^hq0l@941lj2qoau
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.1.30']
 
 
 USE_AES = True
-AES_KEY = "8c0abd334b744562a5251e6f25bca860"
+AES_KEY = "9432797835584249"
 
 
 INSTALLED_APPS = [
