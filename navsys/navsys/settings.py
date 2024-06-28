@@ -140,6 +140,10 @@ SIMPLEUI_HOME_TITLE = "NavigationBar Dashboard"
 
 SIMPLEUI_HOME_INFO = False
 
+# 登录页面
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+
 # MQTT 设置
 MQTT_SERVER = "broker.emqx.io"
 MQTT_PORT = 8883

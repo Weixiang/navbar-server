@@ -1,22 +1,60 @@
-import logging
-from django.shortcuts import render
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import Http404, JsonResponse
+
 from .mqtt import client as mqtt_client
 from .device import DevCtrl
 from .serializers import ItemSerializer
 from .models import Item
 from .crypto import MQTTSafe
+from .forms import RFIDQueryForm
 
+from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-
-# 获取 logger
+import logging
 logger = logging.getLogger('WEB')
 
+# 网页
+def index(request):
+    context = {
+        'project_name': 'MyProject',  # 项目名称
+        'about': '这里是项目的简要说明。',  # 项目说明
+    }
+    logger.info("Project homepage accessed")
+    return render(request, 'index.html', context)
+
+@login_required
+def query_item_by_rfid(request):
+    item = None
+    error_message = None
+
+    if request.method == 'POST':
+        if 'call_item' in request.POST:
+            rfid = request.POST.get('rfid')
+            if rfid:
+                try:
+                    success, result_message = DevCtrl.callItem([rfid], True, 3)
+                    return JsonResponse({'success': success, 'message': result_message})
+                except Exception as e:
+                    return JsonResponse({'success': False, 'message': str(e)})
+        else:
+            form = RFIDQueryForm(request.POST)
+            if form.is_valid():
+                rfid = form.cleaned_data['rfid']
+                try:
+                    item = get_object_or_404(Item, rfid=rfid)
+                except Http404:
+                    error_message = "未找到匹配的物品。"
+    else:
+        form = RFIDQueryForm()
+
+    return render(request, 'rfid.html', {'form': form, 'item': item, 'error_message': error_message})
+
+# API
 def common_decorators(view_func):
     def wrapper(self, request, *args, **kwargs):
         try:
@@ -25,14 +63,6 @@ def common_decorators(view_func):
             logger.error(f"Error occurred in view {view_func.__name__}: {str(e)}", exc_info=True)
             return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return wrapper
-
-def index(request):
-    context = {
-        'project_name': 'MyProject',  # 项目名称
-        'about': '这里是项目的简要说明。',  # 项目说明
-    }
-    logger.info("Project homepage accessed")
-    return render(request, 'index.html', context)
 
 class PublishMessageView(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
