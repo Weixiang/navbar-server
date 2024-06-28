@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Warehouse, Item, Device, Environment, Record
+from .models import *
 from .device import DevCtrl
 
 # Register your models here.
@@ -100,3 +100,9 @@ class RecordAdmin(admin.ModelAdmin):
             return [field.name for field in obj._meta.fields]
         return []  # 创建新对象时，所有字段可编辑
 admin.site.register(Record, RecordAdmin)
+
+class ThresholdAdmin(admin.ModelAdmin):
+    list_display = ('device', 'max_temperature', 'max_humidity', 'max_light')
+    search_fields = ('device__name',)
+    list_filter = ('device',)
+admin.site.register(Threshold, ThresholdAdmin)

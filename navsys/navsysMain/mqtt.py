@@ -41,7 +41,7 @@ def on_message(mqtt_client, userdata, msg):
     sn = msg.topic.split('/')[-1]
     payload = msg.payload
 
-    logger.debug({type(payload)})
+    logger.debug(f'Payload: {payload} {type(payload)}')
     
     # 发送信号，处理消息
     mqtt_received.send(sender=None, topic=topic, sn=sn, payload=payload)

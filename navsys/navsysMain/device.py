@@ -49,6 +49,12 @@ class DevCtrl:
         DevCtrl.publish(topic, message)
 
     @staticmethod
+    def ok(topic:str, sn: str):
+        topic = f'{settings.MQTT_PERFIX}/{topic}/{sn}'
+        message = {'result': 'ok'}
+        DevCtrl.publish(topic, message)
+
+    @staticmethod
     def callItem(rfid_list: list, enable: bool, delay: int = 3):
         try:
             items = Item.objects.filter(rfid__in=rfid_list)
@@ -92,13 +98,12 @@ class DevCtrl:
 
 class MQHandler:
     @staticmethod
-    def config(payload: str):
+    def config(payload: dict):
         try:
-            data = json.loads(payload)
-            name = data.get('name')
-            sn = data.get('sn')
-            ip_address = data.get('ip')
-            mac_address = data.get('mac')
+            name = payload.get('name')
+            sn = payload.get('sn')
+            ip_address = payload.get('ip')
+            mac_address = payload.get('mac')
 
             missing_fields = [field for field, value in {
                 'name': name,
@@ -117,6 +122,7 @@ class MQHandler:
                 device.ip_address = ip_address
                 device.mac_address = mac_address
                 device.save()
+                DevCtrl.ok("config", sn)
                 logger.info(f'Device updated: {device}')
             except ObjectDoesNotExist:
                 Device.objects.create(
@@ -126,6 +132,7 @@ class MQHandler:
                     mac_address=mac_address,
                     last_connection_time=timezone.now()
                 )
+                DevCtrl.ok("config", sn)
                 logger.info('New device added')
         except json.JSONDecodeError as e:
             logger.error(f'Failed to decode JSON: {e}')
@@ -133,10 +140,9 @@ class MQHandler:
             logger.error(f'Error processing message: {e}')
 
     @staticmethod
-    def ping(sn: str, payload: str):
+    def ping(sn: str, payload: dict):
         try:
-            data = json.loads(payload)
-            msg = data.get('msg')
+            msg = payload.get('msg')
             if msg != 'ping':
                 return
             try:
@@ -153,12 +159,12 @@ class MQHandler:
             logger.error(f'Error processing message: {e}')
 
     @staticmethod
-    def sensor(sn: str, payload: str):
+    def sensor(sn: str, payload: dict):
+        logger.debug(f'{sn}传感数据收到，内容{payload}')
         try:
-            data = json.loads(payload)
-            temp = data.get('temp')
-            humi = data.get('humi')
-            light = data.get('light')
+            temp = payload.get('temp')
+            humi = payload.get('humi')
+            light = payload.get('light')
 
             if not any([temp, humi, light]):
                 logger.error('Missing fields in payload')
@@ -173,6 +179,7 @@ class MQHandler:
                     humidity=humi,
                     light=light
                 )
+                DevCtrl.ok("sensor", sn)
                 logger.info('New environment record added')
             except Device.DoesNotExist:
                 logger.error(f'Device with sn {sn} not found')
@@ -182,18 +189,18 @@ class MQHandler:
             logger.error(f'Error processing message: {e}')
 
     @staticmethod
-    def rfid(payload: str):
+    def rfid(sn:str, payload: dict):
         try:
-            data = json.loads(payload)
-            rfid = data.get('rfid')
-            delay = data.get('delay', 3)
+            rfid = payload.get('rfid')
+            delay = payload.get('delay', 3)
             if not rfid:
                 logger.error('Missing field in payload: rfid')
                 return
             try:
                 item = Item.objects.get(rfid=rfid)
                 device = Device.objects.get(location=item.location)
-                DevCtrl.call_device(device.sn, True, delay)
+                DevCtrl.callDevice(device.sn, True, delay)
+                DevCtrl.ok("reader", sn)
                 logger.info(f'RFID Call Device with sn: {device.sn}')
             except Item.DoesNotExist:
                 logger.error(f'Item with RFID {rfid} not found')

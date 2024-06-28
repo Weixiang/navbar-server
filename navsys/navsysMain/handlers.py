@@ -1,6 +1,6 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import Item, Record
+from .models import Item, Record, Environment, Threshold
 from .signals import mqtt_received
 from .device import MQHandler
 import logging
@@ -45,22 +45,46 @@ def handle_mqtt_message(sender, topic, payload, sn, **kwargs):
     logger.info(f'[RAW] Topic: {topic} , Payload:{payload_dict}')
 
     try:
-        payload = MQTTSafe.decrypt(payload_dict)
-    except Exception as e:
-        logger.error(f'Error in decrypt_message: {e}')
+        decrypted_payload = MQTTSafe.decrypt(payload_dict)
+    except ValueError as ve:
+        logger.error(f'ValueError in decrypt_message: {ve}')
         return
+    except Exception as e:
+        logger.error(f'Unexpected error in decrypt_message: {e}')
+        return
+    
+    logger.info(f'[解码完毕] Payload:{decrypted_payload} {type(decrypted_payload)}')
 
+    # Handle the decrypted payload based on topic
     if topic == 'config':
-        MQHandler.config(payload)
+        MQHandler.config(decrypted_payload)
     elif topic == 'ping':
-        MQHandler.ping(sn, payload)
+        MQHandler.ping(sn, decrypted_payload)
     elif topic == 'sensor':
-        MQHandler.sensor(sn, payload)
+        MQHandler.sensor(sn, decrypted_payload)
     elif topic == 'reader':
-        MQHandler.rfid(payload)
+        MQHandler.rfid(sn, decrypted_payload)
+
+
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
+
+
+@receiver(post_save, sender=Environment)
+def check_threshold(sender, instance, **kwargs):
+    try:
+        threshold = Threshold.objects.get(device=instance.device)
+        if instance.temperature is not None and threshold.max_temperature is not None and instance.temperature > threshold.max_temperature:
+            print(f"设备 {instance.device.name} 的温度 {instance.temperature} 超过了阈值 {threshold.max_temperature}")
+
+        if instance.humidity is not None and threshold.max_humidity is not None and instance.humidity > threshold.max_humidity:
+            print(f"设备 {instance.device.name} 的湿度 {instance.humidity} 超过了阈值 {threshold.max_humidity}")
+
+        if instance.light is not None and threshold.max_light is not None and instance.light > threshold.max_light:
+            print(f"设备 {instance.device.name} 的光照 {instance.light} 超过了阈值 {threshold.max_light}")
+    except Threshold.DoesNotExist:
+        print(f"设备 {instance.device.name} 没有设置阈值")

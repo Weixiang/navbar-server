@@ -62,3 +62,14 @@ class Record(models.Model):
         return f"{self.operator.username} - {self.add_time} - {self.method} - {self.item.name}"
 
 
+class Threshold(models.Model):
+    device = models.ForeignKey(Device, verbose_name="设备名", on_delete=models.CASCADE)
+    max_temperature = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="最高温度", blank=True, null=True)
+    max_humidity = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="最高湿度", blank=True, null=True)
+    max_light = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="最高光照", blank=True, null=True)
+
+    class Meta:
+        verbose_name_plural = verbose_name = "阈值"
+
+    def __str__(self):
+        return f"{self.device.name} 阈值设置"

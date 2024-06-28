@@ -20,7 +20,7 @@ class MQTTSafe:
         padded_data = pad(payload.encode('utf-8'), AES.block_size)
         encrypted_data = cipher.encrypt(padded_data)
         encrypted_payload = base64.b64encode(encrypted_data).decode('utf-8')
-        return json.dumps({'data': encrypted_payload})
+        return encrypted_payload
 
     @staticmethod
     def publish(topic, msg):
@@ -34,7 +34,8 @@ class MQTTSafe:
         try:
             if settings.USE_AES:
                 logger.debug(f'Original payload: {payload}')
-                encrypted_payload = MQTTSafe._encrypt_payload(payload)
+                encrypted_raw = MQTTSafe._encrypt_payload(payload)
+                encrypted_payload = json.dumps({'data': encrypted_raw})
                 logger.debug(f'Encrypted payload: {encrypted_payload}')
                 mqtt_client.publish(topic, encrypted_payload)
             else:
@@ -63,11 +64,14 @@ class MQTTSafe:
     def decrypt(payload):
         try:
             if settings.USE_AES:
-                # payload_json = json.loads(payload)
                 encrypted_payload = payload['data']
                 return MQTTSafe._decrypt_payload(encrypted_payload)
             else:
                 return payload
+        except KeyError as ke:
+            logger.error(f'Missing key in payload: {ke}')
+            raise
         except Exception as e:
             logger.error(f'Error in decrypt: {e}')
             raise
+
