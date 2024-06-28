@@ -23,6 +23,21 @@ class MQTTSafe:
         return encrypted_payload
 
     @staticmethod
+    def _decrypt_payload(encrypted_payload):
+        """
+        Decrypts the payload using AES ECB mode with settings.AES_KEY.
+        Accepts base64 encoded payload as input.
+        Returns the decrypted payload as a string.
+        """
+        encrypted_data = base64.b64decode(encrypted_payload)
+        cipher = AES.new(settings.AES_KEY.encode(), AES.MODE_ECB)  # Use ECB mode
+        decrypted_data = cipher.decrypt(encrypted_data)
+        decrypted_data = unpad(decrypted_data, AES.block_size)
+        decrypted_payload = decrypted_data.decode('utf-8')
+        logger.debug(f'Decrypted payload: {decrypted_payload}')
+        return decrypted_payload
+
+    @staticmethod
     def publish(topic, msg):
         msg["sender"] = "server"
 
@@ -46,26 +61,13 @@ class MQTTSafe:
             return False
 
     @staticmethod
-    def _decrypt_payload(encrypted_payload):
-        """
-        Decrypts the payload using AES ECB mode with settings.AES_KEY.
-        Accepts base64 encoded payload as input.
-        Returns the decrypted payload as a string.
-        """
-        encrypted_data = base64.b64decode(encrypted_payload)
-        cipher = AES.new(settings.AES_KEY.encode(), AES.MODE_ECB)  # Use ECB mode
-        decrypted_data = cipher.decrypt(encrypted_data)
-        decrypted_data = unpad(decrypted_data, AES.block_size)
-        decrypted_payload = decrypted_data.decode('utf-8')
-        logger.debug(f'Decrypted payload: {decrypted_payload}')
-        return decrypted_payload
-
-    @staticmethod
     def decrypt(payload):
         try:
             if settings.USE_AES:
                 encrypted_payload = payload['data']
-                return MQTTSafe._decrypt_payload(encrypted_payload)
+                result = MQTTSafe._decrypt_payload(encrypted_payload)
+                result_dict = json.loads(result)
+                return result_dict
             else:
                 return payload
         except KeyError as ke:

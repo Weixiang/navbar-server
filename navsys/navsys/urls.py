@@ -28,6 +28,7 @@ from navsysMain.views import (
     EncryptAPIView,
     DecryptAPIView,
     query_item_by_rfid,
+    crypt,
 )
 
 urlpatterns = [
@@ -37,6 +38,7 @@ urlpatterns = [
 
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('crypt/', crypt, name='encrypt_decrypt'),
 
     path('favicon.ico', RedirectView.as_view(url=r'static/icon/favicon.ico')),
 

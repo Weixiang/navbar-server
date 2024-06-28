@@ -1,13 +1,14 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, JsonResponse
+from django.views import View
 
 from .mqtt import client as mqtt_client
 from .device import DevCtrl
 from .serializers import ItemSerializer
 from .models import Item
 from .crypto import MQTTSafe
-from .forms import RFIDQueryForm
+from .forms import RFIDQueryForm, DataForm
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -26,6 +27,28 @@ def index(request):
     }
     logger.info("Project homepage accessed")
     return render(request, 'index.html', context)
+
+@login_required
+def crypt(request):
+    encrypted_data = None
+    decrypted_data = None
+
+    if request.method == 'POST':
+        form = DataForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data['data']
+            if 'encrypt' in request.POST:
+                encrypted_data = MQTTSafe._encrypt_payload(data)
+            elif 'decrypt' in request.POST:
+                decrypted_data = MQTTSafe._decrypt_payload(data)
+    else:
+        form = DataForm()
+
+    return render(request, 'crypt.html', {
+        'form': form,
+        'encrypted_data': encrypted_data,
+        'decrypted_data': decrypted_data
+    })
 
 @login_required
 def query_item_by_rfid(request):
