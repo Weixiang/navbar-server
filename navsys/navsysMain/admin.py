@@ -20,7 +20,7 @@ class ItemAdmin(admin.ModelAdmin):
     list_per_page = 20
     fieldsets = (
         (None, {
-            'fields': ('name', 'price', 'quantity', 'location', 'status', 'remark', 'operator')
+            'fields': ('name', 'rfid', 'price', 'quantity', 'location', 'status', 'remark', 'operator')
         }),
     )
     # 增加自定义按钮

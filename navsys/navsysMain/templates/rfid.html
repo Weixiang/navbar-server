@@ -16,11 +16,15 @@
 <body>
     <div class="container mt-5">
         <h1 class="text-center">通过 RFID 快速查询物品信息</h1>
-        <form method="post" class="mt-4">
+        <form method="post" class="mt-4" id="rfid-form">
             {% csrf_token %}
             <div class="form-group">
                 <label for="{{ form.rfid.id_for_label }}">{{ form.rfid.label }}</label>
                 <input type="text" name="{{ form.rfid.name }}" id="{{ form.rfid.id_for_label }}" class="form-control" maxlength="100" value="{{ form.rfid.value|default_if_none:'' }}">
+            </div>
+            <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="decimalModeCheck">
+                <label class="form-check-label" for="decimalModeCheck">10进制模式</label>
             </div>
             <button type="submit" class="btn btn-primary">查询</button>
         </form>
@@ -73,6 +77,21 @@
     </div>
 
     <script>
+
+        document.getElementById('rfid-form').addEventListener('submit', function(event) {
+            const decimalModeCheck = document.getElementById('decimalModeCheck');
+            if (decimalModeCheck.checked) {
+                const rfidInput = document.getElementById('{{ form.rfid.id_for_label }}');
+                const decimalNumber = parseInt(rfidInput.value, 10);
+                let hexCardNumber = decimalNumber.toString(16).toUpperCase().padStart(8, '0');
+                let reversedHex = '';
+                for (let i = hexCardNumber.length; i > 0; i -= 2) {
+                    reversedHex += hexCardNumber.substring(i - 2, i);
+                }
+                rfidInput.value = reversedHex;
+            }
+        });
+
         document.getElementById('call-item-btn').addEventListener('click', function(event) {
             event.preventDefault();
             let rfid = document.getElementById('{{ form.rfid.id_for_label }}').value;
