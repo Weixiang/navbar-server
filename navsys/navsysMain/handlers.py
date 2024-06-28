@@ -11,6 +11,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 
+from .qywxbot import sendwx
+
 logger = logging.getLogger('MQTT')
 loggerdb = logging.getLogger('DB')
 
@@ -79,12 +81,19 @@ def check_threshold(sender, instance, **kwargs):
     try:
         threshold = Threshold.objects.get(device=instance.device)
         if instance.temperature is not None and threshold.max_temperature is not None and instance.temperature > threshold.max_temperature:
-            print(f"设备 {instance.device.name} 的温度 {instance.temperature} 超过了阈值 {threshold.max_temperature}")
+            msg = f"设备 {instance.device.name} 的温度 {instance.temperature} 超过了阈值 {threshold.max_temperature}"
+            logger.info(msg)
+            sendwx(msg)
 
         if instance.humidity is not None and threshold.max_humidity is not None and instance.humidity > threshold.max_humidity:
-            print(f"设备 {instance.device.name} 的湿度 {instance.humidity} 超过了阈值 {threshold.max_humidity}")
+            msg = f"设备 {instance.device.name} 的湿度 {instance.humidity} 超过了阈值 {threshold.max_humidity}"
+            logger.info(msg)
+            sendwx(msg)
 
         if instance.light is not None and threshold.max_light is not None and instance.light > threshold.max_light:
-            print(f"设备 {instance.device.name} 的光照 {instance.light} 超过了阈值 {threshold.max_light}")
+            msg = f"设备 {instance.device.name} 的光照 {instance.light} 超过了阈值 {threshold.max_light}"
+            logger.info(msg)
+            sendwx(msg)
+            
     except Threshold.DoesNotExist:
-        print(f"设备 {instance.device.name} 没有设置阈值")
+        logger.debug(f"设备 {instance.device.name} 没有设置阈值")

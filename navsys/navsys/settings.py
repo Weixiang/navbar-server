@@ -148,6 +148,7 @@ MQTT_USER = ''
 MQTT_PASSWORD = ''
 MQTT_PERFIX = 'nav1044'
 
+QYWXBOT_KEY = "506c7b81-7f5f-4f1c-8876-b3adada2af35"
 
 # settings.py
 
