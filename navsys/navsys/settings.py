@@ -109,7 +109,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = 'zh-hans'
 
 USE_TZ = True  # 启用时区支持
 TIME_ZONE = "Asia/Shanghai"  # 设置时区为北京时间
@@ -138,7 +138,11 @@ SIMPLEUI_ICON = {
 
 SIMPLEUI_HOME_TITLE = "NavigationBar Dashboard"
 
+SIMPLEUI_HOME_ICON = 'fa fa-user'
+
 SIMPLEUI_HOME_INFO = False
+
+# SIMPLEUI_LOGO = "/static/icon/apple-touch-icon.png"
 
 # 登录页面
 LOGIN_URL = '/login/'

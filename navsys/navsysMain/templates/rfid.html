@@ -1,9 +1,13 @@
-<!-- query_item.html -->
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>RFID 查询</title>
+    <title>RFID 快查系统</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'icon/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'icon/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'icon/favicon-16x16.png' %}">
+    <link rel="manifest" href="{% static 'icon/site.webmanifest' %}">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
@@ -11,7 +15,7 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="text-center">通过 RFID 查询物品信息</h1>
+        <h1 class="text-center">通过 RFID 快速查询物品信息</h1>
         <form method="post" class="mt-4">
             {% csrf_token %}
             <div class="form-group">

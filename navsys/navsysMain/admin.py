@@ -9,6 +9,7 @@ logger = logging.getLogger('WEB')
 admin.site.site_header = '仓储导航控制台'
 admin.site.site_title = '仓储导航控制台'
 admin.site.index_title = '欢迎使用仓储导航系统'
+admin.site.site_icon = '/static/icon/favicon.ico'
 
 class ItemAdmin(admin.ModelAdmin):
     list_display = ('name', 'rfid', 'price', 'quantity', 'location', 'status', 'add_time', 'operator')
