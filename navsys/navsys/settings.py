@@ -112,7 +112,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = "en-us"
 
 USE_TZ = True  # 启用时区支持
-TIME_ZONE = 'Asia/Shanghai'  # 设置时区为北京时间
+TIME_ZONE = "Asia/Shanghai"  # 设置时区为北京时间
 
 USE_I18N = True
 
@@ -132,26 +132,32 @@ SIMPLEUI_ICON = {
     '环境': 'fa-solid fa-temperature-three-quarters',
     '物品':'fa-solid fa-box',
     '记录':'fa-solid fa-clipboard-list',
-    '仓库':'fa-solid fa-warehouse'
+    '仓库':'fa-solid fa-warehouse',
+    '阈值': 'fa-solid fa-gauge-high',
 }
 
-SIMPLEUI_HOME_TITLE = 'NavigationBar Dashboard'
+SIMPLEUI_HOME_TITLE = "NavigationBar Dashboard"
 
 SIMPLEUI_HOME_INFO = False
 
-# settings.py
-
-MQTT_SERVER = 'broker.emqx.io'
-MQTT_PORT = 1883
+# MQTT 设置
+MQTT_SERVER = "broker.emqx.io"
+MQTT_PORT = 8883
 MQTT_KEEPALIVE = 60
-MQTT_USER = ''
-MQTT_PASSWORD = ''
-MQTT_PERFIX = 'nav1044'
+MQTT_USER = ""
+MQTT_PASSWORD = ""
+MQTT_PERFIX = "nav1044"
 
+MQTT_CA_CERTS = "./navsysMain/certificates/broker.emqx.io-ca.crt"
+MQTT_CERTFILE = ""
+MQTT_KEYFILE = ""
+
+# navsys\navsysMain\certificates\broker.emqx.io-ca.crt
+
+# 企业微信机器人
 QYWXBOT_KEY = "506c7b81-7f5f-4f1c-8876-b3adada2af35"
 
-# settings.py
-
+# 日志输出设置
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

@@ -50,6 +50,13 @@ client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 client.on_disconnect = on_disconnect
+
+# 配置 TLS
+client.tls_set(ca_certs=settings.MQTT_CA_CERTS,
+            #    certfile=settings.MQTT_CERTFILE,
+            #    keyfile=settings.MQTT_KEYFILE,
+               tls_version=mqtt.ssl.PROTOCOL_TLS)
+
 client.username_pw_set(settings.MQTT_USER, settings.MQTT_PASSWORD)
 client.connect(
     host=settings.MQTT_SERVER,
