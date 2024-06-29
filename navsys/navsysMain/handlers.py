@@ -6,6 +6,7 @@ from .device import MQHandler
 import logging
 from .crypto import MQTTSafe
 import json
+import base64
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -34,6 +35,11 @@ def create_record(sender, instance, created, **kwargs):
 
 @receiver(mqtt_received)
 def handle_mqtt_message(sender, topic, payload, sn, **kwargs):
+
+    if settings.ENCRYPT == "BASE64":
+        payload = base64.b64decode(payload)
+        payload = payload.decode('utf-8')
+
     try:
         payload_dict = json.loads(payload)
     except json.JSONDecodeError as e:
@@ -46,26 +52,28 @@ def handle_mqtt_message(sender, topic, payload, sn, **kwargs):
 
     logger.info(f'[RAW] Topic: {topic} , Payload:{payload_dict}')
 
-    try:
-        decrypted_payload = MQTTSafe.decrypt(payload_dict)
-    except ValueError as ve:
-        logger.error(f'ValueError in decrypt_message: {ve}')
-        return
-    except Exception as e:
-        logger.error(f'Unexpected error in decrypt_message: {e}')
-        return
+
+    if settings.ENCRYPT == "AES":
+        try:
+            payload_dict = MQTTSafe.decrypt(payload_dict)
+        except ValueError as ve:
+            logger.error(f'ValueError in decrypt_message: {ve}')
+            return
+        except Exception as e:
+            logger.error(f'Unexpected error in decrypt_message: {e}')
+            return
     
-    logger.info(f'[解码完毕] Payload:{decrypted_payload} {type(decrypted_payload)}')
+    logger.info(f'[解码完毕] Payload:{payload_dict} {type(payload_dict)}')
 
     # Handle the decrypted payload based on topic
     if topic == 'config':
-        MQHandler.config(decrypted_payload)
+        MQHandler.config(payload_dict)
     elif topic == 'ping':
-        MQHandler.ping(sn, decrypted_payload)
+        MQHandler.ping(sn, payload_dict)
     elif topic == 'sensor':
-        MQHandler.sensor(sn, decrypted_payload)
+        MQHandler.sensor(sn, payload_dict)
     elif topic == 'reader':
-        MQHandler.rfid(sn, decrypted_payload)
+        MQHandler.rfid(sn, payload_dict)
 
 
 

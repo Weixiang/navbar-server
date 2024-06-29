@@ -16,6 +16,9 @@ from rest_framework.views import APIView
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
+from django.conf import settings
+import base64
+
 import logging
 logger = logging.getLogger('WEB')
 
@@ -38,9 +41,16 @@ def crypt(request):
         if form.is_valid():
             data = form.cleaned_data['data']
             if 'encrypt' in request.POST:
-                encrypted_data = MQTTSafe._encrypt_payload(data)
+                if settings.ENCRYPT == "AES":
+                    encrypted_data = MQTTSafe._encrypt_payload(data)
+                else:
+                    encrypted_data = MQTTSafe._encrypt_base64(data)
             elif 'decrypt' in request.POST:
-                decrypted_data = MQTTSafe._decrypt_payload(data)
+                if settings.ENCRYPT == "AES":
+                    decrypted_data = MQTTSafe._decrypt_payload(data)
+                else:
+                    decrypted_data = MQTTSafe._decode_base64(data)
+
     else:
         form = DataForm()
 

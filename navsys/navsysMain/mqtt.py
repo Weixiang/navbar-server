@@ -29,9 +29,9 @@ def on_message(mqtt_client, userdata, msg):
     logger.debug(f'Received message on topic: {msg.topic} with payload: {msg.payload} in client {mqtt_client}')
 
     # 检查是否与上一条消息相同
-    if last_message['topic'] == {msg.topic} and last_message['payload'] == {msg.payload}:
-        logger.debug('Received duplicate message. Skipping processing.')
-        return
+    # if last_message['topic'] == {msg.topic} and last_message['payload'] == {msg.payload}:
+    #     logger.debug('Received duplicate message. Skipping processing.')
+    #     return
     
     # 更新上一条消息的内容和主题
     last_message['topic'] = {msg.topic}

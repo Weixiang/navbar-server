@@ -36,6 +36,28 @@ class MQTTSafe:
         decrypted_payload = decrypted_data.decode('utf-8')
         logger.debug(f'Decrypted payload: {decrypted_payload}')
         return decrypted_payload
+    
+    @staticmethod
+    def _encrypt_base64(data):
+        if isinstance(data, str):
+            data = data.encode('utf-8')
+        if isinstance(data, bytes):
+            encoded_data = base64.b64encode(data)
+            encoded_data = encoded_data.decode('utf-8')
+            return encoded_data
+        else:
+            raise TypeError("Input must be a string or bytes")
+
+    @staticmethod
+    def _decode_base64(data):
+        if isinstance(data, str):
+            data = data.encode('utf-8')
+        if isinstance(data, bytes):
+            decoded_data = base64.b64decode(data)
+            decoded_data = decoded_data.decode('utf-8')
+            return decoded_data
+        else:
+            raise TypeError("Input must be a string or bytes")
 
     @staticmethod
     def publish(topic, msg):
@@ -47,24 +69,35 @@ class MQTTSafe:
 
         payload = json.dumps(msg)
         try:
-            if settings.USE_AES:
-                logger.debug(f'Original payload: {payload}')
+            if settings.ENCRYPT == "AES":
+                logger.debug(f'[AES] Original SEND payload: {payload} {type(payload)}')
                 encrypted_raw = MQTTSafe._encrypt_payload(payload)
                 encrypted_payload = json.dumps({'data': encrypted_raw})
-                logger.debug(f'Encrypted payload: {encrypted_payload}')
+                logger.debug(f'[AES] Encrypted SEND payload: {encrypted_payload}')
                 mqtt_client.publish(topic, encrypted_payload)
+                return True
+            elif settings.ENCRYPT == "BASE64":
+                logger.debug(f'[BASE64] Original SEND payload: {payload} {type(payload)}')
+                result = MQTTSafe._encrypt_base64(payload)
+                logger.debug(f'[BASE64] Encrypted SEND payload: {result} {type(result)}')
+                mqtt_client.publish(topic, result)
+                return True
             else:
                 mqtt_client.publish(topic, payload)
             return True
         except Exception as e:
-            logger.error(f'Error in publish: {e}')
+            logger.error(f'[PUBLISH] Error in publish: {e}')
             return False
 
     @staticmethod
     def decrypt(payload):
         try:
-            if settings.USE_AES:
+            if settings.ENCRYPT == "AES":
                 encrypted_payload = payload['data']
+                result = MQTTSafe._decrypt_payload(encrypted_payload)
+                result_dict = json.loads(result)
+                return result_dict
+            elif settings.ENCRYPT == "BASE64":
                 result = MQTTSafe._decrypt_payload(encrypted_payload)
                 result_dict = json.loads(result)
                 return result_dict
