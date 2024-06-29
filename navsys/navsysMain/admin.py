@@ -30,7 +30,7 @@ class ItemAdmin(admin.ModelAdmin):
     def call_button(self, request, queryset):
         try:
             rfid_list = list(queryset.values_list('rfid', flat=True))
-            success, result_message = DevCtrl.callItem(rfid_list, en=True, delay=3)
+            success, result_message = DevCtrl.callItem(rfid_list, True, 10)
             if success:
                 self.message_user(request, result_message, level='success')
             else:
@@ -69,7 +69,7 @@ class DeviceAdmin(admin.ModelAdmin):
         try:
             selected_devices = list(queryset)
             for device in selected_devices:
-                success, error = DevCtrl.callDevice(device.sn, en=True, delay=3)
+                success, error = DevCtrl.callDevice(device.sn, True, 10)
                 if success:
                     self.message_user(request, f"成功呼叫设备 {device.sn}", level='success')
                 else:

@@ -70,7 +70,7 @@ def query_item_by_rfid(request):
             rfid = request.POST.get('rfid')
             if rfid:
                 try:
-                    success, result_message = DevCtrl.callItem([rfid], True, 3)
+                    success, result_message = DevCtrl.callItem([rfid], True, 10)
                     return JsonResponse({'success': success, 'message': result_message})
                 except Exception as e:
                     return JsonResponse({'success': False, 'message': str(e)})
