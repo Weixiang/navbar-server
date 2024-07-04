@@ -98,7 +98,7 @@ class DevCtrl:
 
 class MQHandler:
     @staticmethod
-    def config(payload: dict):
+    def config(sn: str, payload: dict):
         try:
             name = payload.get('name')
             sn = payload.get('sn')
